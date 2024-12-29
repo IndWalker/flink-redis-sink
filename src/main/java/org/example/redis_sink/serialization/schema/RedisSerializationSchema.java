@@ -16,5 +16,5 @@ public interface RedisSerializationSchema<IN extends Tuple2<String, Object>> ext
 
     }
 
-    public RedisElement serialize(IN element);
+    RedisElement serialize(IN element);
 }

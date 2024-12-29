@@ -10,7 +10,7 @@ import org.example.redis_sink.utils.RedisOptions;
 
 public class RedisStringSerializationSchema<KeyValue extends Tuple2<String, Object>> implements RedisSerializationSchema<KeyValue> {
 
-    private StringExtractor extractor;
+    private final StringExtractor extractor = new StringExtractor();
 
     @Override
     public void open(SerializationSchema.InitializationContext initContext, RedisOptions options) throws Exception {

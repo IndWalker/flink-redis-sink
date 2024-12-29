@@ -20,10 +20,6 @@ public class RedisWriter<IN> implements SinkWriter<IN> {
     private final JedisPool jedisPool;
     private final Pipeline pipeline;
 
-    private final int batchSize = 1000;
-    private final int maxWaitMs = 750;
-
-    private List<Pair<String, Object>> buffer;
     private final RedisSerializationSchema<Tuple2<String, Object>> serializationSchema;
 
     public RedisWriter(
@@ -38,20 +34,23 @@ public class RedisWriter<IN> implements SinkWriter<IN> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void write(IN element, Context context) throws IOException, InterruptedException {
+    public void write(IN element, Context context) {
         RedisElement serializedValue = serializationSchema.serialize((Tuple2<String, Object>) element);
         if (serializedValue.getType() == RedisType.HSET) {
             pipeline.hset(serializedValue.getKey(), (Map<String, String>) serializedValue.getValue());
         }
+        if (serializedValue.getType() == RedisType.STRING) {
+            pipeline.set(serializedValue.getKey(), (String) serializedValue.getValue());
+        }
     }
 
     @Override
-    public void flush(boolean endOfInput) throws IOException, InterruptedException {
+    public void flush(boolean endOfInput) {
         pipeline.sync();
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.jedisPool.close();
     }
 }
